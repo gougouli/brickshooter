@@ -1,12 +1,12 @@
 def add(line):
-    values =readFile()
+    values = readFile()
     currentValue = int(getValueLine(values, line))
     price = currentValue**2
-    money = int(getValueLine(values, 1))
+    money = int(getValueLine(values, line_money))
     if money >= price:
         moneyRestant = money - price
         lvl = currentValue + 1
-        writeFile(1, moneyRestant)
+        writeFile(line_money, moneyRestant)
         writeFile(line, lvl)
         print("Acheté")
         return 1
@@ -17,11 +17,11 @@ def remove(line):
     values = readFile()
     currentValue = int(getValueLine(values, line))
     returnPrice = currentValue * 2
-    money = int(getValueLine(values, 1))
+    money = int(getValueLine(values, line_money))
     if currentValue > 0:
         newMoney = money + returnPrice
         lvl = currentValue - 1
-        writeFile(1, newMoney)
+        writeFile(line_money, newMoney)
         writeFile(line, lvl)
         print("Niveau retiré")
         return 1
