@@ -4,7 +4,6 @@ import sys
 from pygame.locals import *
 from enum import Enum
 
-
 class type_bloc(Enum):
     neutre = 0
     defil = 1
@@ -65,14 +64,59 @@ def drawText(text, font, color, surface, x, y):
     textrect.center = (x,y)
     surface.blit(textobj, textrect)
 
-def getHighscore():
+# def getHighscore():
+#     try:
+#         myFile = open("HighScore.txt", "r")
+#         highScore = myFile.read()
+#         myFile.close()
+#     except:
+#         highScore = 0
+#     return highScore
+
+def readFile():
     try:
-        myFile = open("HighScore.txt", "r")
-        highScore = myFile.read()
+        myFile = open("data.txt", "r")
+        file = myFile.read()
         myFile.close()
+        if len(file.split("\n")) != 6:
+            resetFile()
+        return file
+        # TODO fichier vide
     except:
-        highScore = 0
-    return highScore
+        print("Erreur avec l'ouverture du fichier")
+        #TODO fichier inexistant
+        myFile = open("data.txt", "w+")
+        myFile.close()
+        resetFile()
+        return readFile()
+
+def resetFile():
+    file = open("data.txt", "w")
+    file.write("0\n")
+    file.write("0\n")
+    file.write("1\n")
+    file.write("15\n")
+    file.write("5\n")
+    file.close()
+
+def getValueLine(value, line):
+    valeur = value.split("\n")
+    if valeur[line] == '' or valeur[line] is None:
+        return 0
+    return int(valeur[line])
+
+def writeFile(line, valeur):
+    value = readFile()
+    file = open("data.txt", "w")
+    for i in range(0,5):
+        if i != line:
+            file.write(str(getValueLine(value, i)))
+            file.write("\n")
+        else:
+            file.write(str(valeur))
+            file.write("\n")
+    file.close()
+
 
 def menu():
     pygame.mouse.set_visible(1)
@@ -108,8 +152,9 @@ def menu():
         drawText('Shop', font(), (255, 255, 255), screen, centerX, 550)
         drawText('Instructions', font(), (255, 255, 255), screen, centerX, 650)
 
-        highScore = getHighscore()
-        if highScore:
+        highScore = getValueLine(readFile(), line_highscore)
+
+        if highScore > 0 :
             drawText('Best Score :', font(), (255, 255, 0), screen, centerX, 750)
             drawText(str(highScore), font(), (255, 255, 0), screen, centerX, 800)
 
@@ -175,7 +220,9 @@ def pause():
     return running
 
 def endGame(scoreInt):
-    highScore = getHighscore()
+    values = readFile()
+    highScore = getValueLine(values, line_highscore)
+    writeFile(line_money, getValueLine(values, line_money) + int(scoreInt / 10))
     scoreBeatten = False
     end = True
     while end:
@@ -185,9 +232,8 @@ def endGame(scoreInt):
         if scoreInt > int(highScore) or scoreBeatten:
             if not(scoreBeatten) :
                 highScore = scoreInt
-                myFile = open("HighScore.txt", "w+")
-                myFile.write(str(highScore))
-                myFile.close()
+                print(highScore)
+                writeFile(line_highscore, highScore)
                 scoreBeatten = True
             drawText('NEW BEST SCORE :', font(), (255, 255, 0), screen, centerX, centerY+150)
             drawText(str(highScore), font(), (255, 255, 0), screen, centerX, centerY+200)
@@ -222,9 +268,9 @@ def game():
     scoreInt = 0 # Score
     left_pressed = False # Binds (pour rester appuyé)
     right_pressed = False
-    speed_player = 5 # vitesse joueur
-    speed_shot = 15 # vitesse de la balle
-    speed_falling = 1 # vitesse des blocs
+    speed_player = getValueLine(readFile(), line_move_speed) # vitesse joueur
+    speed_shot = getValueLine(readFile(), line_shoot_speed) # vitesse de la balle
+    speed_falling = getValueLine(readFile(), line_defil_speed) # vitesse des blocs
     freq_apparition = 60/speed_falling # fréquence d'apparition des blocs
     fallingTimes = 0 # incrémente à chaque while
 
@@ -438,5 +484,11 @@ asteroid = loadImg("asteroid.png")
 asteroid_defil = loadImg("asteroid_defil.png")
 asteroid_depla = loadImg("asteroid_depla.png")
 asteroid_tir = loadImg("asteroid_tir.png")
+
+line_highscore = 0
+line_money = 1
+line_defil_speed = 2
+line_shoot_speed = 3
+line_move_speed = 4
 
 menu()
