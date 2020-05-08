@@ -3,7 +3,6 @@ from random import randint
 import sys
 from pygame.locals import *
 from enum import Enum
-import shop
 
 class type_bloc(Enum):
     neutre = 0
