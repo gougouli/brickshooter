@@ -3,6 +3,7 @@ from random import randint
 import sys
 from pygame.locals import *
 from enum import Enum
+import shop
 
 class type_bloc(Enum):
     neutre = 0
@@ -509,5 +510,5 @@ line_money = 1
 line_defil_speed = 2
 line_shoot_speed = 3
 line_move_speed = 4
-
+import shop
 menu()
