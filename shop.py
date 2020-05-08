@@ -1,39 +1,3 @@
-highscore = 0
-money = 1
-defil_speed = 2
-shoot_speed = 3
-move_speed = 4
-
-# def readFile():
-#     try:
-#         myFile = open("data.txt", "r")
-#         file = myFile.read()
-#         myFile.close()
-#         return file
-#     except:
-#         print("Erreur avec l'ouverture du fichier")
-#
-# def getValueLine(value, line):
-#     valeur = value.split("\n")
-#     return valeur[line]
-#
-# def writeFile(line, valeur):
-#     value = readFile()
-#     myTblo = []
-#     myTblo.append(getValueLine(value, highscore))
-#     myTblo.append(getValueLine(value, money))
-#     myTblo.append(getValueLine(value, defil_speed))
-#     myTblo.append(getValueLine(value, shoot_speed))
-#     myTblo.append(getValueLine(value, move_speed))
-#     file = open("data.txt", "w")
-#     for i in range(0,5):
-#         if i != line:
-#             file.write(str(myTblo[i]))
-#             file.write("\n")
-#         else:
-#             file.write(str(valeur))
-#             file.write("\n")
-
 def add(line):
     values =readFile()
     currentValue = int(getValueLine(values, line))
