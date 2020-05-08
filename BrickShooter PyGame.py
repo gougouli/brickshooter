@@ -64,15 +64,6 @@ def drawText(text, font, color, surface, x, y):
     textrect.center = (x,y)
     surface.blit(textobj, textrect)
 
-# def getHighscore():
-#     try:
-#         myFile = open("HighScore.txt", "r")
-#         highScore = myFile.read()
-#         myFile.close()
-#     except:
-#         highScore = 0
-#     return highScore
-
 def readFile():
     try:
         myFile = open("data.txt", "r")
@@ -81,10 +72,8 @@ def readFile():
         if len(file.split("\n")) != 6:
             resetFile()
         return file
-        # TODO fichier vide
     except:
-        print("Erreur avec l'ouverture du fichier")
-        #TODO fichier inexistant
+        print("Erreur avec l'ouverture du fichier, réinitialisation")
         myFile = open("data.txt", "w+")
         myFile.close()
         resetFile()
@@ -95,7 +84,7 @@ def resetFile():
     file.write("0\n")
     file.write("0\n")
     file.write("1\n")
-    file.write("15\n")
+    file.write("5\n")
     file.write("5\n")
     file.close()
 
@@ -117,6 +106,35 @@ def writeFile(line, valeur):
             file.write("\n")
     file.close()
 
+def buy(line):
+    values = readFile()
+    currentValue = int(getValueLine(values, line))
+    price = currentValue*2
+    money = int(getValueLine(values, line_money))
+    if money >= price:
+        moneyRestant = money - price
+        lvl = currentValue + 1
+        writeFile(line_money, moneyRestant)
+        writeFile(line, lvl)
+        print("Acheté")
+        return 1
+    print("Pas d'argent")
+    return 0
+
+def sell(line):
+    values = readFile()
+    currentValue = int(getValueLine(values, line))
+    returnPrice = round(currentValue * 1.5)
+    money = int(getValueLine(values, line_money))
+    if currentValue > 0:
+        newMoney = money + returnPrice
+        lvl = currentValue - 1
+        writeFile(line_money, newMoney)
+        writeFile(line, lvl)
+        print("Niveau retiré")
+        return 1
+    print("Vous etes niveau 0 ! Attention")
+    return 0
 
 def menu():
     pygame.mouse.set_visible(1)
@@ -232,7 +250,6 @@ def endGame(scoreInt):
         if scoreInt > int(highScore) or scoreBeatten:
             if not(scoreBeatten) :
                 highScore = scoreInt
-                print(highScore)
                 writeFile(line_highscore, highScore)
                 scoreBeatten = True
             drawText('NEW BEST SCORE :', font(), (255, 255, 0), screen, centerX, centerY+150)
@@ -342,7 +359,9 @@ def game():
                         if meteors[i].type == "depla":
                             speed_player += meteors[i].value
                         if meteors[i].type == "tir":
-                            speed_shot += meteors[i].value
+                            speed_shot -= meteors[i].value
+                            if speed_shot < 1:
+                                speed_shot = 1
                     meteors.pop(i) # Suppression du bloc
                     destroyBullet = 1
                 i += 1
