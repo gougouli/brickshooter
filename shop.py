@@ -27,4 +27,3 @@ def remove(line):
         return 1
     print("Vous etes niveau 0 ! Attention")
     return 0
-remove(move_speed)
