@@ -3,7 +3,7 @@ from random import randint
 import sys
 from pygame.locals import *
 from enum import Enum
-# import pkg_resources.py2_warn
+import pkg_resources.py2_warn
 
 class type_bloc(Enum):
     neutre = 0
