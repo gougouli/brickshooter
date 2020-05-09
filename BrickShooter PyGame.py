@@ -74,7 +74,6 @@ def readFile():
             resetFile()
         return file
     except:
-        print("Erreur avec l'ouverture du fichier, réinitialisation")
         myFile = open("data.txt", "w+")
         myFile.close()
         resetFile()
@@ -82,11 +81,11 @@ def readFile():
 
 def resetFile():
     file = open("data.txt", "w")
-    file.write("0\n")
+    file.write("\n")
     file.write("0\n")
     file.write("1\n")
     file.write("15\n")
-    file.write("5\n")
+    file.write("3\n")
     file.close()
 
 def getValueLine(value, line):
@@ -107,33 +106,15 @@ def writeFile(line, valeur):
             file.write("\n")
     file.close()
 
-def buy_or_sell(line, prix, valeur, min = 1):
+def buy_or_sell(line, prix, valeur, min = 1, max = 99):
     values = readFile()
     currentValue = int(getValueLine(values, line))
     money = int(getValueLine(values, line_money))
-    if (money >= prix or valeur < 0) and (currentValue > min or valeur > 0):
+    if (min < max and ((money >= abs(prix) and currentValue < max and prix < 0) or (currentValue > min and prix > 0))) or (min > max and ((money >= abs(prix) and currentValue > max and prix < 0) or (currentValue < min and prix > 0))):
         newMoney = money + prix
         lvl = currentValue + valeur
         writeFile(line_money, newMoney)
         writeFile(line, lvl)
-        print("Transaction effectuée")
-        return 1
-    return 0
-
-def sell(line):
-    values = readFile()
-    currentValue = int(getValueLine(values, line))
-    returnPrice = round(currentValue * 1.5)
-    money = int(getValueLine(values, line_money))
-    if currentValue > 0:
-        newMoney = money + returnPrice
-        lvl = currentValue - 1
-        writeFile(line_money, newMoney)
-        writeFile(line, lvl)
-        print("Niveau retiré")
-        return 1
-    print("Vous etes niveau 0 ! Attention")
-    return 0
 
 def menu():
     pygame.mouse.set_visible(1)
@@ -292,9 +273,8 @@ def game():
     fallingTimes = 0 # incrémente à chaque while
     can_shoot = 1
     bullet_timer = 0
-
     credits = getValueLine(readFile(), line_money)
-
+    difficulty = 0
     running = True
     while running:
 
@@ -314,11 +294,13 @@ def game():
             i +=1
         for meteor in meteors:
             meteor.move(meteor.x_bloc, meteor.y_bloc, speed_falling)
-            if (meteor.y_bloc > (HEIGHT-player.get_height()-10) and meteor.y_bloc < (HEIGHT-40) and meteor.x_bloc < (x+player.get_width()/2) and meteor.x_bloc > (x-player.get_width()/2) and running):
+            if (meteor.y_bloc > (HEIGHT-player.get_height()-10) and meteor.y_bloc < (HEIGHT-40) and meteor.x_bloc < (x+player.get_width()) and (meteor.x_bloc + asteroid.get_width()) > x and running):
                 running = False
                 endGame(scoreInt, credits)
         if fallingTimes%freq_apparition == 0:
-            generate_meteor(meteors)
+            generate_meteor(meteors, difficulty)
+            if randint(0,4) == 4:
+                difficulty +=1
         fallingTimes += 1
 
 # Affichage du score, du joueur et credits
@@ -357,10 +339,10 @@ def game():
                 if (event.key == K_RIGHT or event.key == K_d): # Droite relachée
                     right_pressed = False
         if left_pressed:
-            if (x > 0 - player.get_width()/3): # Aller à gauche dans la limite de l'écran
+            if (x > 8): # Aller à gauche dans la limite de l'écran
                 x -= speed_player
         if right_pressed:
-            if (x < WIDTH - 2*player.get_width()/3): # Aller à droite dans la limite de l'écran
+            if (x < WIDTH - player.get_width()-8): # Aller à droite dans la limite de l'écran
                 x += speed_player
 
 # Gestion de la balle et suppession du bloc touché
@@ -393,16 +375,16 @@ def game():
             clock.tick(30)
     pygame.mouse.set_visible(1)
 
-def generate_meteor(meteors):
+def generate_meteor(meteors, difficulty):
     for i in range(0,8):
         appear = randint(0,100)
-        if appear < 30:
+        if appear < (20+difficulty):
             x_bloc = 66 + 66*i
             y_bloc = -50
             newMeteor = meteor(int(x_bloc-asteroid.get_width()/2), int(y_bloc-asteroid.get_height()/2))
             meteors.append(newMeteor)
     if meteors == []:
-        generate_meteor(meteors)
+        generate_meteor(meteors, difficulty)
 
 def shop():
     button_length = 50
@@ -415,35 +397,35 @@ def shop():
 
         mx, my = pygame.mouse.get_pos()
 
-        button_defil_moins = pygame.Rect(centerX - int(WIDTH / 4) - int(button_length / 2), 275, button_length, button_length)
-        button_tir_moins = pygame.Rect(centerX - int(WIDTH / 4) - int(button_length / 2), 475, button_length, button_length)
-        button_depla_moins = pygame.Rect(centerX - int(WIDTH / 4) - int(button_length / 2), 675, button_length, button_length)
+        button_defil_moins = pygame.Rect(centerX - int(WIDTH / 6) - int(button_length / 2), 275, button_length, button_length)
+        button_tir_moins = pygame.Rect(centerX - int(WIDTH / 6) - int(button_length / 2), 475, button_length, button_length)
+        button_depla_moins = pygame.Rect(centerX - int(WIDTH / 6) - int(button_length / 2), 675, button_length, button_length)
 
-        button_defil_plus = pygame.Rect(centerX + int(WIDTH / 4) - int(button_length / 2), 275, button_length, button_length)
-        button_tir_plus = pygame.Rect(centerX + int(WIDTH / 4) - int(button_length / 2), 475, button_length, button_length)
-        button_depla_plus = pygame.Rect(centerX + int(WIDTH / 4) - int(button_length / 2), 675, button_length, button_length)
+        button_defil_plus = pygame.Rect(centerX + int(WIDTH / 6) - int(button_length / 2), 275, button_length, button_length)
+        button_tir_plus = pygame.Rect(centerX + int(WIDTH / 6) - int(button_length / 2), 475, button_length, button_length)
+        button_depla_plus = pygame.Rect(centerX + int(WIDTH / 6) - int(button_length / 2), 675, button_length, button_length)
 
         if button_defil_moins.collidepoint((mx, my)):
-            pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(centerX-int(WIDTH/4)-int((button_length+border)/2), int(275 - border/2), button_length+border, button_length+border))
+            pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(centerX-int(WIDTH/6)-int((button_length+border)/2), int(275 - border/2), button_length+border, button_length+border))
         if button_tir_moins.collidepoint((mx, my)):
-            pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(centerX-int(WIDTH/4) - int((button_length + border) / 2), int(475 - border / 2), button_length + border, button_length + border))
+            pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(centerX-int(WIDTH/6) - int((button_length + border) / 2), int(475 - border / 2), button_length + border, button_length + border))
         if button_depla_moins.collidepoint((mx, my)):
-            pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(centerX-int(WIDTH/4)-int((button_length+border)/2), int(675 - border/2), button_length+border, button_length+border))
+            pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(centerX-int(WIDTH/6)-int((button_length+border)/2), int(675 - border/2), button_length+border, button_length+border))
 
         if button_defil_plus.collidepoint((mx, my)):
-            pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(centerX+int(WIDTH/4)-int((button_length+border)/2), int(275 - border/2), button_length+border, button_length+border))
+            pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(centerX+int(WIDTH/6)-int((button_length+border)/2), int(275 - border/2), button_length+border, button_length+border))
         if button_tir_plus.collidepoint((mx, my)):
-            pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(centerX+int(WIDTH/4) - int((button_length + border) / 2), int(475 - border / 2), button_length + border, button_length + border))
+            pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(centerX+int(WIDTH/6) - int((button_length + border) / 2), int(475 - border / 2), button_length + border, button_length + border))
         if button_depla_plus.collidepoint((mx, my)):
-            pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(centerX+int(WIDTH/4)-int((button_length+border)/2), int(675 - border/2), button_length+border, button_length+border))
+            pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(centerX+int(WIDTH/6)-int((button_length+border)/2), int(675 - border/2), button_length+border, button_length+border))
 
         pygame.draw.rect(screen, (45, 175, 230), button_defil_moins)
         pygame.draw.rect(screen, (45, 175, 230), button_tir_moins)
         pygame.draw.rect(screen, (45, 175, 230), button_depla_moins)
 
-        drawText('-', font(60), (255, 255, 255), screen, centerX - int(WIDTH / 4), 300)
-        drawText('-', font(60), (255, 255, 255), screen, centerX - int(WIDTH / 4), 500)
-        drawText('-', font(60), (255, 255, 255), screen, centerX - int(WIDTH / 4), 700)
+        drawText('-', font(60), (255, 255, 255), screen, centerX - int(WIDTH / 6), 300)
+        drawText('-', font(60), (255, 255, 255), screen, centerX - int(WIDTH / 6), 500)
+        drawText('-', font(60), (255, 255, 255), screen, centerX - int(WIDTH / 6), 700)
 
         drawText('Meteor speed', font(), (255, 255, 255), screen, centerX, 250)
         drawText('Bullet speed', font(), (255, 255, 255), screen, centerX, 450)
@@ -453,16 +435,47 @@ def shop():
         drawText('Credits : ' + str(getValueLine(values, line_money)), font(20), (255, 255, 0), screen, int(WIDTH / 1.2), 10)
         drawText('Lvl. ' + str(getValueLine(values, line_defil_speed)), font(30), (255, 255, 0), screen, centerX, 300)
         drawText('Lvl. ' + str(16-getValueLine(values, line_shoot_speed)), font(30), (255, 255, 0), screen, centerX, 500)
-        drawText('Lvl. ' + str(getValueLine(values, line_move_speed)-4), font(30), (255, 255, 0), screen, centerX, 700)
+        drawText('Lvl. ' + str(getValueLine(values, line_move_speed)-2), font(30), (255, 255, 0), screen, centerX, 700)
 
         pygame.draw.rect(screen, (45, 175, 230), button_defil_plus)
         pygame.draw.rect(screen, (45, 175, 230), button_tir_plus)
         pygame.draw.rect(screen, (45, 175, 230), button_depla_plus)
 
-        drawText('+', font(60), (255, 255, 255), screen, centerX + int(WIDTH/4), 300)
-        drawText('+', font(60), (255, 255, 255), screen, centerX + int(WIDTH/4), 500)
-        drawText('+', font(60), (255, 255, 255), screen, centerX + int(WIDTH/4), 700)
+        drawText('+', font(60), (255, 255, 255), screen, centerX + int(WIDTH/6), 300)
+        drawText('+', font(60), (255, 255, 255), screen, centerX + int(WIDTH/6), 500)
+        drawText('+', font(60), (255, 255, 255), screen, centerX + int(WIDTH/6), 700)
 
+        drawText('Resale price', font(20), (255, 255, 0), screen, centerX - int(WIDTH/4), 200)
+        drawText('Purchase price', font(20), (255, 255, 0), screen, centerX + int(WIDTH/4), 200)
+
+        defil_price_sell = str(2*getValueLine(values, line_defil_speed)) + ' Crdts'
+        defil_price_buy = str(5 * getValueLine(values, line_defil_speed)) + ' Crdts'
+        if getValueLine(values, line_defil_speed) == 1:
+            defil_price_sell = "Lvl min."
+        elif getValueLine(values, line_defil_speed) == 99:
+            defil_price_buy = "Lvl max."
+
+        shoot_price_sell = str(int((2**(18-getValueLine(values, line_shoot_speed)-1))/2)) + ' Crdts'
+        shoot_price_buy = str(2 ** (18-getValueLine(values, line_shoot_speed))) + ' Crdts'
+        if getValueLine(values, line_shoot_speed) == 15:
+            shoot_price_sell = "Lvl min."
+        elif getValueLine(values, line_shoot_speed) == 1:
+            shoot_price_buy = "Lvl max."
+
+        depla_price_sell = str(2 * getValueLine(values, line_move_speed)) + ' Crdts'
+        depla_price_buy = str(4 * getValueLine(values, line_move_speed)) + ' Crdts'
+        if getValueLine(values, line_move_speed) == 3:
+            depla_price_sell = "Lvl min."
+        elif getValueLine(values, line_move_speed) == 101:
+            depla_price_buy = "Lvl max."
+
+        drawText(defil_price_sell, font(25), (0, 255, 0), screen, centerX - int(WIDTH / 3), 300)
+        drawText(shoot_price_sell, font(25), (0, 255, 0), screen, centerX - int(WIDTH / 3), 500)
+        drawText(depla_price_sell, font(25), (0, 255, 0), screen, centerX - int(WIDTH / 3), 700)
+
+        drawText(defil_price_buy, font(25), (255, 0, 20), screen, centerX + int(WIDTH / 3), 300)
+        drawText(shoot_price_buy, font(25), (255, 0, 0), screen, centerX + int(WIDTH / 3), 500)
+        drawText(depla_price_buy, font(25), (255, 0, 0), screen, centerX + int(WIDTH / 3), 700)
 
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -475,16 +488,16 @@ def shop():
                 if button_defil_moins.collidepoint((mx, my)):
                     buy_or_sell(line_defil_speed, 2*getValueLine(values, line_defil_speed), -1)
                 if button_tir_moins.collidepoint((mx, my)):
-                    buy_or_sell(line_shoot_speed, 2 * getValueLine(values, line_shoot_speed), 1)
+                    buy_or_sell(line_shoot_speed, int((2**(18-getValueLine(values, line_shoot_speed)-1))/2), 1, 15, 1)
                 if button_depla_moins.collidepoint((mx, my)):
-                    buy_or_sell(line_move_speed, 2 * getValueLine(values, line_move_speed), -1)
+                    buy_or_sell(line_move_speed, 2 * getValueLine(values, line_move_speed), -1, 3, 101)
 
                 if button_defil_plus.collidepoint((mx, my)):
-                    buy_or_sell(line_defil_speed, -3 * getValueLine(values, line_defil_speed), 1)
+                    buy_or_sell(line_defil_speed, -5 * getValueLine(values, line_defil_speed), 1)
                 if button_tir_plus.collidepoint((mx, my)):
-                    buy_or_sell(line_shoot_speed, -3 * getValueLine(values, line_shoot_speed), -1)
+                    buy_or_sell(line_shoot_speed, -2 ** (18-getValueLine(values, line_shoot_speed)), -1, 15, 1)
                 if button_depla_plus.collidepoint((mx, my)):
-                    buy_or_sell(line_move_speed, -3 * getValueLine(values, line_move_speed), 1)
+                    buy_or_sell(line_move_speed, -4 * getValueLine(values, line_move_speed), 1, 3, 101)
 
         pygame.display.update()
         clock.tick(30)
